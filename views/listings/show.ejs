@@ -1,0 +1,126 @@
+<% layout("/layouts/boilerplate") %>
+<script>
+  const mapToken = "<%= process.env.MAP_TOKEN %>";
+  const coordinates = <%- JSON.stringify(lsiting.geometry.coordinates)  %>;
+</script>
+<div class="row mt-3">
+  <div class="col-8 offset-3">
+    <h3><b><%= lsiting.title %></b></h3>
+  </div>
+
+  <div class="card cardlisting col-6 offset-3 show-card">
+    <img
+      src="<%= lsiting.image.url  %>"
+      class="card-img-top show-img"
+      alt="listing-image"
+    />
+    <div class="card-body">
+      <p class="card-text"><h5><b>Owned By <%= lsiting.owner.username  %></b></h5></p>
+      <p class="card-text"> <%= lsiting.description %></p>
+      <p class="card-text">
+        <% if (lsiting.price && lsiting.price > 0) { %>
+          <span>&#8377; <%= lsiting.price.toLocaleString("en-IN") %>/night</span>
+        <% } else { %>
+          <span>Price not available</span>
+        <% } %>
+      </p>
+      <p class="card-text">  <%= lsiting.location %></p>
+      <p class="card-text">   <%= lsiting.country %></p>
+
+    </div>
+  </div>
+
+  <br />
+   
+  <% if(currUser && currUser._id.equals(lsiting.owner._id)){ %>
+  <div class="btns">
+    <a
+      href="/listings/<%= lsiting._id %>/edit"
+      class="btn btn-dark col-1 offset-3"
+      id="add-btn"
+      >Edit</a
+    >
+
+    <form method="post" action="/listings/<%= lsiting._id %>?_method=DELETE">
+      <Button class="btn btn-dark offset-5">Delete</Button>
+    </form>
+  </div>
+<% } %>
+
+
+
+  <div class="col-8 offset-3 mb-3">
+   
+    <% if(currUser){ %>
+      <hr />
+      <h4>Leave a Review</h4>
+    <form action="/listings/<%= lsiting.id %>/reviews" method="post" novalidate class="needs-validation">
+      
+      <div class="mb-3 mt-3">
+      <label for="rating" class="form-label">Rating</label>
+      <fieldset class="starability-slot">
+        <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" checked aria-label="No rating." />
+        <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+        <label for="first-rate1" title="Terrible">1 star</label>
+        <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+        <label for="first-rate2" title="Not good">2 stars</label>
+        <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+        <label for="first-rate3" title="Average">3 stars</label>
+        <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+        <label for="first-rate4" title="Very good">4 stars</label>
+        <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+        <label for="first-rate5" title="Amazing">5 stars</label>
+      </fieldset>
+    </div>
+      <div class="mb-3 mt-3">
+        <label for="comment" class="form-label">Comment</label>
+        <textarea
+          name="review[comment]"
+          id="comment"
+          cols="30"
+          rows="5"
+          class="form-control"
+          required
+        ></textarea>
+        <div class="invalid-feedback">Please add some review</div>
+      </div>
+      <button class="btn btn-outline-dark">Submit</button>
+    </form>
+  <% } %>
+  
+    <hr>
+
+    <% if(lsiting.reviews.length>0) {%>
+      <div class="row">
+        <p><b>All Reviews<b></p>
+    <% for(review of lsiting.reviews){ %>
+        <div class="card col-5 ms-3 mb-3" >
+
+          <div class="card-body">
+            <p> @<%= review.author.username %></p>
+            <p class="starability-result " data-rating="<%= review.rating %>"></p>
+            <h5 class="card-title"><%=review.comment  %></h5>
+
+          </div>
+          
+          <% if(currUser && currUser.equals(review.author)){ %>
+          <form class="mb-3" method="post" action="/listings/<%= lsiting.id %>/reviews/<%= review.id %>?_method=DELETE">
+            <button class="btn btn-sm btn-dark ">Delte</button>
+          </form>
+          <% } %>
+          </div>
+         
+          <% } %>
+        </div>
+        <% } %>
+  </div>
+  <div class="col-6 offset-3 mb-3" >
+    <h3>Where you'll be</h3>
+    <div id="map"></div>
+
+  </div>
+</div>
+
+
+<script src="/js/map.js"></script>
+
